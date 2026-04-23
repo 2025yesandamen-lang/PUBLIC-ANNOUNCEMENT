@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Publice Announcement</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  margin: 0;
+}
+
+header {
+  background: #0d6efd;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.container {
+  padding: 15px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.post-btn {
+  background: #0d6efd;
+  color: white;
+  width: 100%;
+}
+
+.whatsapp {
+  background: #25D366;
+  color: white;
+  margin-top: 10px;
+}
+
+.delete {
+  background: red;
+  color: white;
+  margin-top: 5px;
+}
+
+.small {
+  font-size: 12px;
+  color: gray;
+}
+</style>
+</head>
+
+<body>
+
+<header>📢 PUBLIC ANNOUNCEMENT</header>
+
+<div class="container">
+
+  <div class="card">
+    <h3>Add Notice</h3>
+    <input id="title" placeholder="Title (e.g. Light restored)">
+    <input id="location" placeholder="Location (e.g. Ajah)">
+    <textarea id="message" placeholder="Write details..."></textarea>
+    <button class="post-btn" onclick="addNotice()">Post Notice</button>
+  </div>
+
+  <div id="notices"></div>
+
+</div>
+
+<script>
+let notices = JSON.parse(localStorage.getItem("notices")) || [];
+
+function addNotice() {
+  const title = document.getElementById("title").value;
+  const location = document.getElementById("location").value;
+  const message = document.getElementById("message").value;
+
+  if (!title || !location || !message) {
+    alert("Fill all fields");
+    return;
+  }
+
+  const notice = {
+    id: Date.now(),
+    title,
+    location,
+    message,
+    date: new Date().toLocaleString()
+  };
+
+  notices.unshift(notice);
+  localStorage.setItem("notices", JSON.stringify(notices));
+
+  document.getElementById("title").value = "";
+  document.getElementById("location").value = "";
+  document.getElementById("message").value = "";
+
+  displayNotices();
+}
+
+function deleteNotice(id) {
+  notices = notices.filter(n => n.id !== id);
+  localStorage.setItem("notices", JSON.stringify(notices));
+  displayNotices();
+}
+
+function shareWhatsApp(notice) {
+  const text = `📢 ${notice.title}\n📍 ${notice.location}\n\n${notice.message}`;
+  const url = "https://wa.me/?text=" + encodeURIComponent(text);
+  window.open(url, "_blank");
+}
+
+function displayNotices() {
+  const container = document.getElementById("notices");
+  container.innerHTML = "";
+
+  notices.forEach(n => {
+    container.innerHTML += `
+      <div class="card">
+        <h3>${n.title}</h3>
+        <p><strong>📍 ${n.location}</strong></p>
+        <p>${n.message}</p>
+        <p class="small">${n.date}</p>
+
+        <button class="whatsapp" onclick='shareWhatsApp(${JSON.stringify(n)})'>
+          Share on WhatsApp
+        </button>
+
+        <button class="delete" onclick="deleteNotice(${n.id})">
+          Delete
+        </button>
+      </div>
+    `;
+  });
+}
+
+displayNotices();
+</script>
+
+</body>
+</html>
